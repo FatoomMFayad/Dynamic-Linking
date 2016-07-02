@@ -1,0 +1,455 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+
+
+import java.util.Properties;
+import de.tudarmstadt.ukp.wikipedia.LuceneExamples;
+import de.tudarmstadt.ukp.wikipedia.LuceneExamples2;
+import de.tudarmstadt.ukp.wikipedia.TestRelatedness;
+import de.tudarmstadt.ukp.wikipedia.WikiURL;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import de.tudarmstadt.ukp.wikipedia.api.Category;
+import de.tudarmstadt.ukp.wikipedia.api.DatabaseConfiguration;
+import de.tudarmstadt.ukp.wikipedia.api.Page;
+import de.tudarmstadt.ukp.wikipedia.api.Wikipedia;
+import de.tudarmstadt.ukp.wikipedia.api.exception.WikiException;
+import de.tudarmstadt.ukp.wikipedia.api.exception.WikiInitializationException;
+import de.tudarmstadt.ukp.wikipedia.api.exception.WikiPageNotFoundException;
+import de.tudarmstadt.ukp.wikipedia.api.WikiConstants.Language;
+import edu.stanford.nlp.ie.crf.CRFClassifier;
+import edu.stanford.nlp.ling.CoreLabel;
+
+
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BoxView;
+import javax.swing.text.ComponentView;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Document;
+import javax.swing.text.Element;
+import javax.swing.text.Highlighter;
+import javax.swing.text.IconView;
+import javax.swing.text.LabelView;
+import javax.swing.text.ParagraphView;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
+import javax.swing.text.StyledEditorKit;
+import javax.swing.text.View;
+import javax.swing.text.ViewFactory;
+//import org.wikibrainapi;
+import javax.swing.text.Highlighter.HighlightPainter;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.swing.DefaultListModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.GroupLayout;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.border.EmptyBorder;
+
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.Color;
+import java.awt.ComponentOrientation;
+import java.awt.Font;
+import java.awt.Insets;
+import java.awt.Toolkit;
+import javax.swing.JTextPane;
+import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
+import javax.swing.JEditorPane;
+public class GUI extends javax.swing.JFrame {
+
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
+     * Creates new form EmployeeGUI
+     */
+    public DefaultListModel<String> mylstModel = new DefaultListModel<String>();
+    JEditorPane editorPane = new JEditorPane();
+    private HighlightPainter painter =  new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
+    private HighlightPainter painter1 =  new DefaultHighlighter.DefaultHighlightPainter(Color.CYAN);
+    private ArrayList<String> highlightwords = new ArrayList<String>();
+    private ArrayList<String> highlightpages = new ArrayList<String>();
+   
+   
+    DefaultComboBoxModel<String> mycmbModel=new DefaultComboBoxModel<String>();
+    String pack="";
+    public CRFClassifier<CoreLabel> segmenter;
+    
+    public GUI() {
+    	setIconImage(Toolkit.getDefaultToolkit().getImage("E:\\Master\\Thesis\\Software\\EclipseWorkspace\\de.tudarmstadt.ukp.wikipedia\\assets\\1463578983_wikipediapx.png"));
+    	addWindowListener(new WindowAdapter() {
+    		@Override
+    		public void windowOpened(WindowEvent arg0) {
+    			final String basedir = System.getProperty("GUI", "data");
+        		Properties props = new Properties();
+        		props.setProperty("sighanCorporaDict", basedir);
+        		props.setProperty("serDictionary", basedir + "/dict-chris6.ser.gz");
+        		props.setProperty("inputEncoding", "UTF-8");
+                props.setProperty("sighanPostProcessing", "true");
+                Locale arabic = new Locale("ar", "KW");
+                ComponentOrientation arabicOrientation = ComponentOrientation.getOrientation(arabic);
+                txtCriteria.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT); 
+                editorPane_1.applyComponentOrientation(arabicOrientation);
+                
+                pack();
+                setSize(800, 600); 
+         		}
+    		@Override
+    		public void windowActivated(WindowEvent arg0) {
+    		}
+    	});
+        initComponents();
+        this.fillCombo();       
+       
+    }
+    
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings({ "deprecation" })
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        txtCriteria = new javax.swing.JTextField();
+        txtCriteria.setFont(new Font("Tahoma", Font.BOLD, 15));
+        btnSearch = new javax.swing.JButton();
+        btnSearch.setFont(new Font("Tahoma", Font.BOLD, 15));
+        btnSearch.setText("بحث");
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("ويكيبديا");
+
+        btnSearch.setLabel("بحث");
+        btnSearch.setName("btnSearch"); // NOI18N
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                try {
+					btnSearchActionPerformed(evt);
+				} catch (WikiException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				}
+            }
+        });
+        editorPane.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        editorPane.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        editorPane.setEditable(false);
+        scrollPane = new JScrollPane();
+
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        layout.setHorizontalGroup(
+        	layout.createParallelGroup(Alignment.TRAILING)
+        		.addGroup(Alignment.LEADING, layout.createSequentialGroup()
+        			.addContainerGap()
+        			.addGroup(layout.createParallelGroup(Alignment.LEADING)
+        				.addComponent(scrollPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 554, Short.MAX_VALUE)
+        				.addGroup(layout.createSequentialGroup()
+        					.addComponent(btnSearch)
+        					.addPreferredGap(ComponentPlacement.RELATED)
+        					.addComponent(txtCriteria, GroupLayout.DEFAULT_SIZE, 495, Short.MAX_VALUE)))
+        			.addContainerGap())
+        );
+        layout.setVerticalGroup(
+        	layout.createParallelGroup(Alignment.LEADING)
+        		.addGroup(layout.createSequentialGroup()
+        			.addContainerGap()
+        			.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+        				.addComponent(txtCriteria, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
+        				.addComponent(btnSearch))
+        			.addGap(5)
+        			.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE))
+        );
+        
+        editorPane_1 = new JEditorPane();
+        editorPane_1.setFont(new Font("Tahoma", Font.BOLD, 15));
+        scrollPane.setViewportView(editorPane_1);
+        editorPane_1.setEditorKit(new WrapEditorKit());
+        editorPane_1.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+      
+
+        getContentPane().setLayout(layout);
+       
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+    public void fillCombo(){                
+			mycmbModel.addElement("page");
+			mycmbModel.addElement("category");
+		
+                
+    }
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) throws WikiException, IOException {//GEN-FIRST:event_btnSearchActionPerformed
+    	   
+    			Locale arabic = new Locale("ar", "KW");
+    			ComponentOrientation arabicOrientation = ComponentOrientation.getOrientation(arabic);
+    			scrollPane.setComponentOrientation(arabicOrientation);
+    			editorPane_1.setComponentOrientation(arabicOrientation);
+               	highlightwords.clear();
+    	    	highlightpages.clear();
+    	    	editorPane_1.setText(" ");
+    	    	DatabaseConfiguration dbConfig = new DatabaseConfiguration();
+        		dbConfig.setHost("localhost");
+        		dbConfig.setDatabase("arwiki");
+        		dbConfig.setUser("root");
+        		dbConfig.setPassword("root");
+        		dbConfig.setLanguage(Language.arabic);
+        		
+                Wikipedia wiki = new Wikipedia(dbConfig);
+                String title = txtCriteria.getText().trim();
+                String text = stopWords.removeStopWords(title);
+                String finaltext = stopWords.removeStopWords(text);
+                List<String> tokens = NGram.ngrams(1,finaltext);
+    	        List<String> twograms = NGram.ngrams(2,finaltext);
+    	        List<String> threegrams = NGram.ngrams(3,finaltext);
+    	        
+    	        long startTime = System.currentTimeMillis();
+    	       
+    	        List<String> allGrams = new ArrayList<String>();
+    	        if(!threegrams.isEmpty())
+    	        	allGrams.addAll(threegrams);
+    	        if(!twograms.isEmpty())
+    	        	allGrams.addAll(twograms);
+    	        if(!tokens.isEmpty())
+    	        	allGrams.addAll(tokens);
+    	        
+    	       HashMap<String, Set<Page>> pageMap = new HashMap<String, Set<Page>>();
+    	       long startTimeP = System.currentTimeMillis(); 
+    	       for(String tmp: allGrams){
+    	        	if(!isCovered(tmp, pageMap)){
+    	        		try{
+		        			Set<Page> pages = wiki.getPages(tmp);
+		        			if(pages != null && !pages.isEmpty()){
+		        			pageMap.put(tmp, pages);
+		        			}
+    	        		}catch(Exception e){
+
+    	        		}
+    	        	}
+    	        }   	        
+    	        for(String anchor: pageMap.keySet()){
+    	        	Set<Page> allPages = LuceneExamples.search(anchor,wiki);
+    	        	pageMap.put(anchor, allPages);   	        	
+    	        }
+    	        long endTimeP   = System.currentTimeMillis();
+   	        	long totalTimeP = endTimeP - startTimeP;
+    	        Map<String, Page> achorPageMap = new HashMap<String, Page>();
+    	        long startTime1 = System.currentTimeMillis();
+    	        for(String anchor: pageMap.keySet()){
+    	        	Set<Page> localPages = pageMap.get(anchor);
+    	        	List<Page> otherPages = new ArrayList<Page>();
+    	        	int pageId = 0;
+    	        	for(String anchor2: pageMap.keySet()){
+    	        		if(!anchor.equalsIgnoreCase(anchor2)){
+    	        			otherPages.addAll(pageMap.get(anchor2));
+    	        		}  	        			
+    	        	}
+ 	        		if(otherPages.size() == 0){
+	        			pageId = wiki.getPage(anchor).getPageId();
+	        			achorPageMap.put(anchor, wiki.getPage(pageId));
+	        		//	System.out.println(pageId);
+	        		}
+	        		 
+    	        	pageId = TestRelatedness.chooseAnchor(localPages, otherPages);
+    	        	if(pageId != 0){
+    	        		Page topPage = wiki.getPage(pageId);
+    	        		achorPageMap.put(anchor, topPage);
+    	        	}
+    	        }    	        
+    	        
+    	        long endTime1   = System.currentTimeMillis();
+   	        	long totalTime1 = endTime1 - startTime1;  	       
+   	        	long startTime2 = System.currentTimeMillis();
+    	       List<String> toRemove = new ArrayList<String>();
+    	        
+    	        for(String anchor: achorPageMap.keySet()){
+    	        	Page currentPage = achorPageMap.get(anchor);
+    	        	List<Page> otherPages = new ArrayList<Page>();
+    	        	otherPages.addAll(achorPageMap.values());
+    	        	otherPages.remove(currentPage);
+    	        	if(!TestRelatedness.filter(currentPage, otherPages)){
+    	        		toRemove.add(anchor);
+    	        	}
+    	        }
+    	        for(String badAnchor: toRemove){
+    	        	achorPageMap.remove(badAnchor);
+    	        	
+    	        } 
+    	        long endTime2   = System.currentTimeMillis();
+   	        	long totalTime2 = endTime2 - startTime2;
+    	        int i = 0;
+    	        for(String anchor: achorPageMap.keySet()){
+	           		i++;
+	           		highlightpages.add("عنوان صفحة الويكيبديا: "+achorPageMap.get(anchor).getTitle().toString());
+	           		highlightwords.add(WikiURL.getWikipediaPageUrl(achorPageMap.get(anchor).getPageId()));
+	           		editorPane_1.setText(editorPane_1.getText() + "النص" +" (" +i+")"+ ": "+anchor + "\n\n");    	        
+    	           	editorPane_1.setText(editorPane_1.getText() + "عنوان صفحة الويكيبديا: "+achorPageMap.get(anchor).getTitle().toString() + "\n\n");
+    	           	editorPane_1.setText(editorPane_1.getText() + WikiURL.getWikipediaPageUrl(achorPageMap.get(anchor).getPageId())+"\n\n");
+    	           	editorPane_1.setText(editorPane_1.getText() + "*********************************************************************\n");
+    	        }
+    	        try {
+       				for(int w=0;w<highlightpages.size();w++){
+       					 // System.out.println(highlightwords.get(i));
+    	       				highlightPages(editorPane_1, highlightpages.get(w)); }
+    			} catch (Exception e) {
+    				// TODO Auto-generated catch block
+    			}  
+    	        try {
+       				for(int w=0;w<highlightwords.size();w++){
+       					 // System.out.println(highlightwords.get(i));
+    	       				highlightURL(editorPane_1, highlightwords.get(w)); }
+    			} catch (Exception e) {
+    				// TODO Auto-generated catch block
+    			}  	  
+    	       TestRelatedness.relatednessHistory.clear();
+
+   	        	long endTime   = System.currentTimeMillis();
+   	        	long totalTime = endTime - startTime;
+   	      
+    }
+    
+    private boolean isCovered(String tmp, HashMap<String, Set<Page>> pageMap) {
+		boolean isCovered = false;
+    	for(String s: pageMap.keySet()){
+			if(s.toLowerCase().trim().contains(tmp.toLowerCase().trim())){
+				isCovered = true;
+				break;
+			}
+		}
+		return isCovered;
+	}
+	public void highlightURL(JEditorPane textComp,String pattern) throws Exception {
+		 
+		Highlighter highlighter = textComp.getHighlighter();
+		Document doc = textComp.getDocument();
+		String text = textComp.getText (0,doc.getLength());
+		int pos =0;
+		while ((pos=text.indexOf(pattern,pos))>=0) {
+		      highlighter.addHighlight(pos, pos+pattern.length(), painter1 );
+		      pos+=pattern.length(); 
+	  }
+	}
+	public void highlightPages(JEditorPane textComp,String pattern) throws Exception {
+		 
+		Highlighter highlighter = textComp.getHighlighter();
+		Document doc = textComp.getDocument();
+		String text = textComp.getText (0,doc.getLength());
+		int pos =0;
+		while ((pos=text.indexOf(pattern,pos))>=0) {
+		      highlighter.addHighlight(pos, pos+pattern.length(), painter );
+		      pos+=pattern.length(); 
+	  }
+	}
+
+	   class WrapEditorKit extends StyledEditorKit {
+	        ViewFactory defaultFactory=new WrapColumnFactory();
+	        public ViewFactory getViewFactory() {
+	            return defaultFactory;
+	        }
+	    }
+	   class WrapColumnFactory implements ViewFactory {
+	        public View create(Element elem) {
+	            String kind = elem.getName();
+	            if (kind != null) {
+	                if (kind.equals(AbstractDocument.ContentElementName)) {
+	                    return new WrapLabelView(elem);
+	                } else if (kind.equals(AbstractDocument.ParagraphElementName)) {
+	                    return new ParagraphView(elem);
+	                } else if (kind.equals(AbstractDocument.SectionElementName)) {
+	                    return new BoxView(elem, View.Y_AXIS);
+	                } else if (kind.equals(StyleConstants.ComponentElementName)) {
+	                    return new ComponentView(elem);
+	                } else if (kind.equals(StyleConstants.IconElementName)) {
+	                    return new IconView(elem);
+	                }
+	            }
+	 
+	            // default to text display
+	            return new LabelView(elem);
+	        }
+	    }
+	 
+	    class WrapLabelView extends LabelView {
+	        public WrapLabelView(Element elem) {
+	            super(elem);
+	        }
+	 
+	        public float getMinimumSpan(int axis) {
+	            switch (axis) {
+	                case View.X_AXIS:
+	                    return 0;
+	                case View.Y_AXIS:
+	                    return super.getMinimumSpan(axis);
+	                default:
+	                    throw new IllegalArgumentException("Invalid axis: " + axis);
+	            }
+	        }
+	 
+	    }
+	/**
+     * @param args the command line arguments
+     * @throws WikiException 
+     * @throws IOException 
+     */
+    public static void main(String args[]) throws WikiException, IOException {
+          try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new GUI().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnSearch;
+    private javax.swing.JTextField txtCriteria;
+    private JScrollPane scrollPane;
+    private JEditorPane editorPane_1;
+}
